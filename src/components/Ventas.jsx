@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './ProductList.module.css';
+import Toastify from 'toastify-js';
+import "toastify-js/src/toastify.css";
 
 const CantidadDialog = ({ isOpen, producto, onClose, onSave }) => {
     const [tempCantidad, setTempCantidad] = useState(producto?.cantidad || 1);
@@ -67,31 +69,39 @@ const Ventas = () => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const searchInputRef = useRef(null);
 
+    const mostrarError = (mensaje) => {
+        Toastify({
+            text: mensaje,
+            duration: 3000,
+            close: true,
+            gravity: "top",
+            position: "right",
+            style: {
+                background: "#ff6b6b",
+            }
+        }).showToast();
+    };
+
     const agregarProducto = async () => {
         try {
-            const codigo = nombreProducto.toUpperCase(); // Convertir a mayúsculas
+            const codigo = nombreProducto.toUpperCase();
             const response = await fetch(`http://localhost:5000/ventas/buscar/codigo?codigo=${codigo}`);
-            if (response.status === 404) {
-                console.error('Producto no encontrado');
-                setNombreProducto('');
-                searchInputRef.current?.focus();
-                return;
+    
+            if (!response.ok) {
+                throw new Error(`Producto no encontrado: ${codigo}`);
             }
+    
             const data = await response.json();
-            if (data) {
-                const nuevoProducto = { ...data, cantidad: 1 };
-                setProductos([...productos, nuevoProducto]);
-                setTotal(total + nuevoProducto.precio);
-                setNombreProducto('');
-            } else {
-                console.error('Producto no encontrado');
-                setNombreProducto('');
-            }
-        } catch (error) {
-            console.error('Error fetching product:', error);
+            const nuevoProducto = { ...data, cantidad: 1 };
+            setProductos([...productos, nuevoProducto]);
+            setTotal(total + nuevoProducto.precio);
             setNombreProducto('');
+        } catch (error) {
+            mostrarError(error.message || "Error al buscar el producto");
+            setNombreProducto('');
+        } finally {
+            searchInputRef.current?.focus();
         }
-        searchInputRef.current?.focus();
     };
 
     const actualizarCantidad = (index, cantidad) => {
@@ -106,9 +116,16 @@ const Ventas = () => {
         setTotal(prevTotal => prevTotal + diferencia);
     };
 
+    const eliminarProducto = (index) => {
+        const producto = productos[index];
+        const nuevosProductos = productos.filter((_, i) => i !== index);
+        setProductos(nuevosProductos);
+        setTotal(prevTotal => prevTotal - (producto.precio * producto.cantidad));
+        setSelectedIndex(Math.min(index, nuevosProductos.length - 1));
+    };
+
     const handleKeyDown = (e) => {
         if (dialogOpen) {
-            // No manejar eventos de teclado globales cuando el diálogo está abierto
             return;
         }
 
@@ -129,9 +146,9 @@ const Ventas = () => {
                 }
                 e.preventDefault();
                 break;
-            case 'Enter':
-                if (document.activeElement === searchInputRef.current) {
-                    agregarProducto();
+            case 'Delete':
+                if (selectedIndex !== -1) {
+                    eliminarProducto(selectedIndex);
                 }
                 e.preventDefault();
                 break;
@@ -141,7 +158,7 @@ const Ventas = () => {
     useEffect(() => {
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [productos, selectedIndex, dialogOpen]);
+    }, [productos, selectedIndex, dialogOpen, eliminarProducto]);
 
     // Reset numeroBuffer cuando cambie el producto seleccionado
     useEffect(() => {
@@ -165,8 +182,10 @@ const Ventas = () => {
                     placeholder="Nombre del producto"
                     onKeyDown={(e) => {
                         if (e.key === 'Enter') {
-                            agregarProducto();
                             e.preventDefault();
+                            if (document.activeElement === searchInputRef.current) {
+                                agregarProducto();
+                            }
                         }
                     }}
                 />
