@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import styles from './ProductList.module.css';
 
 const CantidadDialog = ({ isOpen, producto, onClose, onSave }) => {
     const [tempCantidad, setTempCantidad] = useState(producto?.cantidad || 1);
@@ -171,15 +172,15 @@ const Ventas = () => {
                 />
                 <button onClick={agregarProducto}>Agregar Producto</button>
             </div>
-            <ul>
+            <ul className={styles.productList}>
                 {productos.map((producto, index) => (
-                    <li key={index} 
-                        style={{ 
-                            backgroundColor: selectedIndex === index ? '#e0e0e0' : 'transparent',
-                            padding: '5px'
-                        }}
+                    <li 
+                        key={index}
+                        className={`${styles.productItem} ${selectedIndex === index ? styles.selected : ''}`}
                     >
-                        {producto.nombre} - ${producto.precio} x {producto.cantidad}
+                        <span className={styles.productName}>{producto.nombre}</span>
+                        <span className={styles.productPrice}>${producto.precio}</span>
+                        <span className={styles.productQuantity}>x {producto.cantidad}</span>
                     </li>
                 ))}
             </ul>
