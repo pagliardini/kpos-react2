@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom'; // Importa Link desde react-router-dom
+import { Link } from 'react-router-dom'; 
 import './App.css';
 
 function App() {
@@ -13,7 +13,6 @@ function App() {
       </header>
 
       <main>
-        {/* Enlace para navegar a Ventas */}
         <Link to="/ventas">
           <button>Ir a Ventas</button>
         </Link>

@@ -165,7 +165,7 @@ const Ventas = () => {
         setNumeroBuffer('');
     }, [selectedIndex]);
 
-    // Focus search input when component mounts and after each render
+    // Foco en Busqueda
     useEffect(() => {
         searchInputRef.current?.focus();
     });
@@ -192,14 +192,21 @@ const Ventas = () => {
                 <button onClick={agregarProducto}>Agregar Producto</button>
             </div>
             <ul className={styles.productList}>
+                <li className={styles.productHeader}>
+                    <span className={styles.productQuantity}>Cantidad</span>
+                    <span className={styles.productName}>Nombre</span>
+                    <span className={styles.productPrice}>Precio</span>
+                    <span className={styles.productSubtotal}>Subtotal</span>
+                </li>
                 {productos.map((producto, index) => (
                     <li 
                         key={index}
                         className={`${styles.productItem} ${selectedIndex === index ? styles.selected : ''}`}
                     >
+                        <span className={styles.productQuantity}>x {producto.cantidad}</span>
                         <span className={styles.productName}>{producto.nombre}</span>
                         <span className={styles.productPrice}>${producto.precio}</span>
-                        <span className={styles.productQuantity}>x {producto.cantidad}</span>
+                        <span className={styles.productSubtotal}>${(producto.precio * producto.cantidad).toFixed(2)}</span>
                     </li>
                 ))}
             </ul>
