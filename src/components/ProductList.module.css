@@ -1,17 +1,15 @@
-/* Estilos generales de la aplicación */
 body {
     font-family: Arial, sans-serif;
-    background-color: #fafafa; /* Gris muy claro */
+    background-color: #fafafa;
     margin: 0;
     padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    color: #333;
+    color: #2c3e50;
 }
 
-/* Contenedor principal de la aplicación */
 div {
     width: 100%;
     max-width: 900px;
@@ -22,28 +20,33 @@ div {
     transition: all 0.3s ease;
 }
 
-/* Títulos */
 h1, h2, h3 {
-    color: #333;  /* Gris oscuro */
+    color: #333;
     text-align: center;
-    font-size: 32px;  /* Aumentado */
+    font-size: 32px;
 }
 
-/* Estilo de los botones */
 button {
-    background-color: #68a0b5;  /* Azul suave */
+    background-color: #68a0b5;
     color: white;
     border: none;
-    padding: 15px 25px; /* Aumentado */
-    margin: 15px 0; /* Aumentado */
-    font-size: 18px; /* Aumentado */
+    padding: 15px 25px;
+    margin: 15px 0;
+    font-size: 18px;
     cursor: pointer;
     border-radius: 8px;
     transition: background-color 0.3s ease;
 }
 
 button:hover {
-    background-color: #557a88;  /* Azul más oscuro */
+    background-color: #557a88;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 button:disabled {
@@ -51,23 +54,24 @@ button:disabled {
     cursor: not-allowed;
 }
 
-/* Estilo del campo de búsqueda */
 input[type="text"], input[type="number"] {
     width: 100%;
-    padding: 15px; /* Aumentado */
-    margin: 15px 0; /* Aumentado */
-    font-size: 18px; /* Aumentado */
-    border: 2px solid #eee9e9; /* Gris claro para el borde */
+    padding: 15px;
+    margin: 15px 0;
+    font-size: 18px;
+    border: 2px solid #eee9e9;
     border-radius: 8px;
     box-sizing: border-box;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 input[type="text"]:focus, input[type="number"]:focus {
-    border-color: #68a0b5; /* Azul suave al enfocar */
+    border-color: #3498db;
     outline: none;
+    box-shadow: 0 0 5px rgba(52,152,219,0.3);
 }
 
-/* Lista de productos */
 ul {
     list-style-type: none;
     padding: 0;
@@ -78,23 +82,25 @@ li {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 18px; /* Aumentado */
-    border-bottom: 1px solid #e0e0e0;  /* Gris suave */
-    font-size: 18px; /* Aumentado */
+    padding: 15px 20px;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 18px;
     background-color: #ffffff;
     transition: background-color 0.3s;
+    border-radius: 4px;
+    margin-bottom: 5px;
 }
 
 li:hover {
-    background-color: #f1f1f1; /* Gris muy suave al pasar el mouse */
+    background-color: #f1f1f1;
 }
 
 li.selected {
-    background-color: #c7e8c8; /* Verde suave */
+    background-color: #e3f2fd;
     font-weight: bold;
+    border-left: 4px solid #2196f3;
 }
 
-/* Modal de edición de cantidad */
 .modal {
     position: fixed;
     top: 50%;
@@ -103,32 +109,44 @@ li.selected {
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
-    padding: 30px; /* Aumentado */
-    width: 350px; /* Aumentado */
+    padding: 30px;
+    width: 350px;
     z-index: 1000;
     text-align: center;
     max-width: 100%;
+    animation: fadeIn 0.2s ease;
+    border: 1px solid #e0e0e0;
 }
 
 .modal input {
     width: 80%;
-    padding: 15px; /* Aumentado */
-    margin-bottom: 20px; /* Aumentado */
-    font-size: 18px; /* Aumentado */
+    padding: 15px;
+    margin-bottom: 20px;
+    font-size: 18px;
     border: 2px solid #ddd;
     border-radius: 8px;
 }
 
 .modal button {
-    background-color: #4CAF50;  /* Verde más cálido */
-    margin-right: 15px; /* Aumentado */
+    background-color: #4CAF50;
+    margin-right: 15px;
+    padding: 12px 24px;
+    margin: 0 8px;
+    min-width: 100px;
+}
+
+.modal button:first-child {
+    background-color: #2196f3;
+}
+
+.modal button:last-child {
+    background-color: #90a4ae;
 }
 
 .modal button:hover {
-    background-color: #45a049;  /* Verde más oscuro */
+    background-color: #45a049;
 }
 
-/* Estilos para el modal de cobro */
 .modal-cobro {
     position: fixed;
     top: 50%;
@@ -137,8 +155,8 @@ li.selected {
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
-    padding: 30px; /* Aumentado */
-    width: 350px; /* Aumentado */
+    padding: 30px;
+    width: 350px;
     z-index: 1000;
     text-align: center;
     max-width: 100%;
@@ -151,38 +169,52 @@ li.selected {
 }
 
 .modal-cobro li {
-    padding: 18px; /* Aumentado */
+    padding: 18px;
     cursor: pointer;
     border-bottom: 1px solid #ddd;
     transition: background-color 0.3s;
-    font-size: 18px; /* Aumentado */
+    font-size: 18px;
 }
 
 .modal-cobro li:hover {
-    background-color: #f7f7f7;
+    background-color: #f5f9ff;
 }
 
 .modal-cobro .selected {
-    background-color: #68a0b5;  /* Azul suave */
-    color: rgb(12, 12, 12);
-    font-weight: bold;
+    background-color: #e3f2fd;
+    border-left: 4px solid #2196f3;
+    color: #2c3e50;
 }
 
-/* Notificaciones de Toastify */
 .toastify-container {
-    margin-top: 30px; /* Aumentado */
+    margin-top: 30px;
 }
 
-/* Estilos de total */
+:global(.toastify) {
+    max-width: 280px !important;
+    font-size: 14px !important;
+    padding: 12px 15px !important;
+    margin: 5px !important;
+    border-radius: 6px !important;
+}
+
 h2 {
-    color: #333; /* Gris oscuro */
-    font-size: 24px; /* Aumentado */
+    color: #333;
+    font-size: 24px;
     font-weight: bold;
-    margin-top: 30px; /* Aumentado */
+    margin-top: 30px;
+    text-align: right;
+    padding-right: 20px;
 }
 
 h2 span {
-    color: #4CAF50;  /* Verde para el total */
-    font-size: 28px; /* Aumentado */
-    margin-left: 15px; /* Aumentado */
+    color: #2196f3;
+    font-size: 28px;
+    margin-left: 15px;
+    font-weight: bold;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, -48%); }
+    to { opacity: 1; transform: translate(-50%, -50%); }
 }
