@@ -86,11 +86,30 @@ const Ventas = () => {
         try {
             const codigo = nombreProducto.toUpperCase();
             const response = await fetch(`http://localhost:5000/ventas/buscar/codigo?codigo=${codigo}`);
-    
+
             if (!response.ok) {
-                throw new Error(`Producto no encontrado: ${codigo}`);
+                // Intenta buscar en Pricely si no se encuentra el producto
+                const pricelyResponse = await fetch(`http://127.0.0.1:5000/ventas/pricely/${codigo}`);
+                const pricelyData = await pricelyResponse.json();
+                
+                // Mostrar error del producto no encontrado
+                Toastify({
+                    text: `Producto no encontrado: ${codigo}`,
+                    duration: 3000,
+                    style: { background: "#ff6b6b" }
+                }).showToast();
+
+                // Mostrar sugerencia de Pricely
+                Toastify({
+                    text: `Sugerencia Pricely:\n${pricelyData.nombre} \n ${pricelyData.precio}`,
+                    duration: 10000,
+                    style: { background: "#4CAF50" }
+                }).showToast();
+
+                setNombreProducto('');
+                return;
             }
-    
+
             const data = await response.json();
             const nuevoProducto = { ...data, cantidad: 1 };
             setProductos([...productos, nuevoProducto]);
