@@ -1,27 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
-import styles from './ProductList.module.css';
 import Toastify from 'toastify-js';
 import "toastify-js/src/toastify.css";
+import styles from './ProductList.module.css';
 
+// Componente para mostrar y editar la cantidad de un producto
 const CantidadDialog = ({ isOpen, producto, onClose, onSave }) => {
-    const [tempCantidad, setTempCantidad] = useState(producto?.cantidad || 1);
+    const [tempCantidad, setTempCantidad] = useState(1);
     const inputRef = useRef(null);
 
     useEffect(() => {
-        if (isOpen) {
-            setTempCantidad(producto?.cantidad || 1);
-            // Asegurar que el input esté enfocado y seleccionado
+        if (isOpen && producto) {
+            setTempCantidad(producto.cantidad || 1);
             setTimeout(() => {
-                if (inputRef.current) {
-                    inputRef.current.focus();
-                    inputRef.current.select();
-                }
+                inputRef.current?.focus();
+                inputRef.current?.select();
             }, 10);
         }
     }, [isOpen, producto]);
 
     const handleKeyDown = (e) => {
-        e.stopPropagation(); // Detener la propagación del evento
+        e.stopPropagation();
         if (e.key === 'Enter') {
             onSave(tempCantidad);
             e.preventDefault();
@@ -34,41 +32,86 @@ const CantidadDialog = ({ isOpen, producto, onClose, onSave }) => {
     if (!isOpen) return null;
 
     return (
-        <div style={{
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            backgroundColor: 'white',
-            padding: '20px',
-            boxShadow: '0 0 10px rgba(0,0,0,0.5)',
-            zIndex: 1000
-        }}>
-            <h3>{producto?.nombre}</h3>
+        <div className={styles.modal}>
+            <h3>Modificar cantidad de {producto.nombre}</h3>
             <input
                 ref={inputRef}
                 type="number"
                 value={tempCantidad}
-                onChange={(e) => setTempCantidad(parseInt(e.target.value) || 1)}
+                onChange={(e) => setTempCantidad(Math.max(1, parseInt(e.target.value)))}
                 onKeyDown={handleKeyDown}
                 min="1"
             />
-            <p>Precio: ${producto ? (producto.precio * tempCantidad).toFixed(2) : 0}</p>
             <button onClick={() => onSave(tempCantidad)}>Guardar</button>
+            <button onClick={onClose}>Cancelar</button>
+        </div>
+    );
+};
+
+// Modal de cobro con opciones de pago
+const ModalCobro = ({ isOpen, productos, onClose, onCobrar }) => {
+    const [selectedIndex, setSelectedIndex] = useState(0);
+
+    const opcionesPago = [
+        { nombre: "Efectivo", recargo: 0 },
+        { nombre: "Tarjeta", recargo: 5 },
+        { nombre: "Transferencia", recargo: 0 },
+    ];
+
+    const calcularTotalConRecargo = () => {
+        const total = productos.reduce((sum, producto) => sum + (producto.precio * producto.cantidad), 0);
+        const recargo = opcionesPago[selectedIndex].recargo;
+        return total * (1 + recargo / 100);
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'ArrowUp') {
+            setSelectedIndex((prev) => Math.max(0, prev - 1));
+        } else if (e.key === 'ArrowDown') {
+            setSelectedIndex((prev) => Math.min(opcionesPago.length - 1, prev + 1));
+        } else if (e.key === 'Enter') {
+            onCobrar(opcionesPago[selectedIndex]);
+            e.preventDefault();
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [selectedIndex, productos]);
+
+    if (!isOpen) return null;
+
+    return (
+        <div className={styles.modal}>
+            <h3>Seleccionar método de cobro</h3>
+            <ul>
+                {opcionesPago.map((opcion, index) => (
+                    <li
+                        key={index}
+                        className={selectedIndex === index ? styles.selected : ''}
+                    >
+                        {opcion.nombre} (Recargo: {opcion.recargo}%)
+                    </li>
+                ))}
+            </ul>
+            <p>Total con recargo: ${calcularTotalConRecargo().toFixed(2)}</p>
             <button onClick={onClose}>Cerrar</button>
         </div>
     );
 };
 
+// Componente principal de ventas
 const Ventas = () => {
     const [productos, setProductos] = useState([]);
     const [nombreProducto, setNombreProducto] = useState('');
     const [total, setTotal] = useState(0);
     const [selectedIndex, setSelectedIndex] = useState(-1);
-    const [numeroBuffer, setNumeroBuffer] = useState('');
     const [dialogOpen, setDialogOpen] = useState(false);
+    const [modalCobroOpen, setModalCobroOpen] = useState(false);
     const searchInputRef = useRef(null);
 
+    // Función para mostrar los errores con Toastify
     const mostrarError = (mensaje) => {
         Toastify({
             text: mensaje,
@@ -82,15 +125,17 @@ const Ventas = () => {
         }).showToast();
     };
 
+    // Función para agregar un producto
     const agregarProducto = async () => {
+        if (nombreProducto === '') return; // Asegura que no se agreguen productos vacíos
         try {
             const codigo = nombreProducto.toUpperCase();
             const response = await fetch(`http://localhost:5000/ventas/buscar/codigo?codigo=${codigo}`);
-    
+
             if (!response.ok) {
                 throw new Error(`Producto no encontrado: ${codigo}`);
             }
-    
+
             const data = await response.json();
             const nuevoProducto = { ...data, cantidad: 1 };
             setProductos([...productos, nuevoProducto]);
@@ -104,32 +149,43 @@ const Ventas = () => {
         }
     };
 
+    // Función para actualizar la cantidad de un producto
     const actualizarCantidad = (index, cantidad) => {
         const nuevosProductos = [...productos];
         const producto = nuevosProductos[index];
-        const cantidadPrevia = producto.cantidad || 1;
-        const nuevaCantidad = Math.max(1, cantidad); // Asegura que la cantidad no sea menor a 1
-        const diferencia = (nuevaCantidad - cantidadPrevia) * parseFloat(producto.precio);
-        
-        producto.cantidad = nuevaCantidad;
+        const diferencia = (cantidad - producto.cantidad) * producto.precio;
+
+        producto.cantidad = cantidad;
         setProductos(nuevosProductos);
         setTotal(prevTotal => prevTotal + diferencia);
     };
 
+    // Función para eliminar un producto
     const eliminarProducto = (index) => {
         const producto = productos[index];
         const nuevosProductos = productos.filter((_, i) => i !== index);
         setProductos(nuevosProductos);
         setTotal(prevTotal => prevTotal - (producto.precio * producto.cantidad));
+
+        // Actualizamos el índice de selección para que no quede fuera de los límites
         setSelectedIndex(Math.min(index, nuevosProductos.length - 1));
+
+        Toastify({
+            text: `Producto ${producto.nombre} eliminado`,
+            duration: 3000,
+            close: true,
+            gravity: "top",
+            position: "right",
+            style: {
+                background: "#ff6b6b",
+            }
+        }).showToast();
     };
 
+    // Lógica de navegación con las teclas
     const handleKeyDown = (e) => {
-        if (dialogOpen) {
-            return;
-        }
+        if (modalCobroOpen || dialogOpen) return;
 
-        // Si el diálogo está cerrado, manejar navegación y selección
         switch (e.key) {
             case 'ArrowUp':
                 setSelectedIndex(prev => Math.max(0, prev - 1));
@@ -142,7 +198,6 @@ const Ventas = () => {
             case '*':
                 if (selectedIndex !== -1) {
                     setDialogOpen(true);
-                    setNumeroBuffer('');
                 }
                 e.preventDefault();
                 break;
@@ -152,77 +207,63 @@ const Ventas = () => {
                 }
                 e.preventDefault();
                 break;
+            case 'Enter':
+                if (nombreProducto !== '') {
+                    agregarProducto(); // Añadir el producto al presionar Enter
+                } else if (productos.length > 0) {
+                    setModalCobroOpen(true);
+                }
+                e.preventDefault();
+                break;
+            default:
+                break;
         }
     };
 
     useEffect(() => {
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [productos, selectedIndex, dialogOpen, eliminarProducto]);
-
-    // Reset numeroBuffer cuando cambie el producto seleccionado
-    useEffect(() => {
-        setNumeroBuffer('');
-    }, [selectedIndex]);
-
-    // Foco en Busqueda
-    useEffect(() => {
-        searchInputRef.current?.focus();
-    });
+    }, [productos, nombreProducto, selectedIndex, modalCobroOpen, dialogOpen]);
 
     return (
         <div>
             <h1>Ventas</h1>
-            <div>
-                <input 
-                    ref={searchInputRef}
-                    type="text" 
-                    value={nombreProducto} 
-                    onChange={(e) => setNombreProducto(e.target.value)} 
-                    placeholder="Nombre del producto"
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                            e.preventDefault();
-                            if (document.activeElement === searchInputRef.current) {
-                                agregarProducto();
-                            }
-                        }
-                    }}
-                />
-                <button onClick={agregarProducto}>Agregar Producto</button>
-            </div>
-            <ul className={styles.productList}>
-                <li className={styles.productHeader}>
-                    <span className={styles.productQuantity}>Cantidad</span>
-                    <span className={styles.productName}>Nombre</span>
-                    <span className={styles.productPrice}>Precio</span>
-                    <span className={styles.productSubtotal}>Subtotal</span>
-                </li>
+            <input
+                ref={searchInputRef}
+                type="text"
+                value={nombreProducto}
+                onChange={(e) => setNombreProducto(e.target.value)}
+                placeholder="Buscar producto por código"
+            />
+            <ul>
                 {productos.map((producto, index) => (
-                    <li 
-                        key={index}
-                        className={`${styles.productItem} ${selectedIndex === index ? styles.selected : ''}`}
-                    >
-                        <span className={styles.productQuantity}>x {producto.cantidad}</span>
-                        <span className={styles.productName}>{producto.nombre}</span>
-                        <span className={styles.productPrice}>${producto.precio}</span>
-                        <span className={styles.productSubtotal}>${(producto.precio * producto.cantidad).toFixed(2)}</span>
+                    <li key={index} className={selectedIndex === index ? styles.selected : ''}>
+                        <span>x {producto.cantidad}</span>
+                        <span>{producto.nombre}</span>
+                        <span>${producto.precio}</span>
+                        <span>${(producto.precio * producto.cantidad).toFixed(2)}</span>
                     </li>
                 ))}
             </ul>
-            <h2>Total: ${total}</h2>
-            
-            <CantidadDialog 
+            <h2>Total: ${total.toFixed(2)}</h2>
+
+            <CantidadDialog
                 isOpen={dialogOpen}
-                producto={selectedIndex !== -1 ? productos[selectedIndex] : null}
-                onClose={() => {
-                    setDialogOpen(false);
-                    searchInputRef.current?.focus();
-                }}
-                onSave={(cantidad) => {
+                producto={productos[selectedIndex]}
+                onClose={() => setDialogOpen(false)}
+                onSave={cantidad => {
                     actualizarCantidad(selectedIndex, cantidad);
                     setDialogOpen(false);
-                    searchInputRef.current?.focus();
+                }}
+            />
+
+            <ModalCobro
+                isOpen={modalCobroOpen}
+                productos={productos}
+                onClose={() => setModalCobroOpen(false)}
+                onCobrar={(opcion) => {
+                    console.log('Cobrar con:', opcion);
+                    setModalCobroOpen(false);
                 }}
             />
         </div>

@@ -1,58 +1,188 @@
-.productList {
-    list-style: none;
+/* Estilos generales de la aplicación */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #fafafa; /* Gris muy claro */
+    margin: 0;
     padding: 0;
-    margin: 20px 0;
-    max-height: 400px;
-    overflow-y: auto;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: #333;
 }
 
-.productItem {
-    padding: 12px 16px;
-    border-bottom: 1px solid #eee;
+/* Contenedor principal de la aplicación */
+div {
+    width: 100%;
+    max-width: 900px;
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+/* Títulos */
+h1, h2, h3 {
+    color: #333;  /* Gris oscuro */
+    text-align: center;
+    font-size: 32px;  /* Aumentado */
+}
+
+/* Estilo de los botones */
+button {
+    background-color: #68a0b5;  /* Azul suave */
+    color: white;
+    border: none;
+    padding: 15px 25px; /* Aumentado */
+    margin: 15px 0; /* Aumentado */
+    font-size: 18px; /* Aumentado */
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #557a88;  /* Azul más oscuro */
+}
+
+button:disabled {
+    background-color: #b0b0b0;
+    cursor: not-allowed;
+}
+
+/* Estilo del campo de búsqueda */
+input[type="text"], input[type="number"] {
+    width: 100%;
+    padding: 15px; /* Aumentado */
+    margin: 15px 0; /* Aumentado */
+    font-size: 18px; /* Aumentado */
+    border: 2px solid #eee9e9; /* Gris claro para el borde */
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+input[type="text"]:focus, input[type="number"]:focus {
+    border-color: #68a0b5; /* Azul suave al enfocar */
+    outline: none;
+}
+
+/* Lista de productos */
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+li {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 18px; /* Aumentado */
+    border-bottom: 1px solid #e0e0e0;  /* Gris suave */
+    font-size: 18px; /* Aumentado */
+    background-color: #ffffff;
+    transition: background-color 0.3s;
 }
 
-.productItem:last-child {
-    border-bottom: none;
+li:hover {
+    background-color: #f1f1f1; /* Gris muy suave al pasar el mouse */
 }
 
-.selected {
-    background-color: #e0e0e0;
-}
-
-.productName {
-    flex: 1;
-}
-
-.productPrice {
-    margin: 0 20px;
-    color: #666;
+li.selected {
+    background-color: #c7e8c8; /* Verde suave */
     font-weight: bold;
 }
 
-.productQuantity {
-    min-width: 60px;
-    text-align: left;
-    color: #2196f3;
+/* Modal de edición de cantidad */
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+    padding: 30px; /* Aumentado */
+    width: 350px; /* Aumentado */
+    z-index: 1000;
+    text-align: center;
+    max-width: 100%;
+}
+
+.modal input {
+    width: 80%;
+    padding: 15px; /* Aumentado */
+    margin-bottom: 20px; /* Aumentado */
+    font-size: 18px; /* Aumentado */
+    border: 2px solid #ddd;
+    border-radius: 8px;
+}
+
+.modal button {
+    background-color: #4CAF50;  /* Verde más cálido */
+    margin-right: 15px; /* Aumentado */
+}
+
+.modal button:hover {
+    background-color: #45a049;  /* Verde más oscuro */
+}
+
+/* Estilos para el modal de cobro */
+.modal-cobro {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+    padding: 30px; /* Aumentado */
+    width: 350px; /* Aumentado */
+    z-index: 1000;
+    text-align: center;
+    max-width: 100%;
+}
+
+.modal-cobro ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.modal-cobro li {
+    padding: 18px; /* Aumentado */
+    cursor: pointer;
+    border-bottom: 1px solid #ddd;
+    transition: background-color 0.3s;
+    font-size: 18px; /* Aumentado */
+}
+
+.modal-cobro li:hover {
+    background-color: #f7f7f7;
+}
+
+.modal-cobro .selected {
+    background-color: #68a0b5;  /* Azul suave */
+    color: rgb(12, 12, 12);
     font-weight: bold;
 }
 
-.productHeader {
-    padding: 12px 16px;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #f5f5f5;
-    font-weight: bold;
+/* Notificaciones de Toastify */
+.toastify-container {
+    margin-top: 30px; /* Aumentado */
 }
 
-.productSubtotal {
-    margin: 0 20px;
-    color: #666;
+/* Estilos de total */
+h2 {
+    color: #333; /* Gris oscuro */
+    font-size: 24px; /* Aumentado */
     font-weight: bold;
+    margin-top: 30px; /* Aumentado */
+}
+
+h2 span {
+    color: #4CAF50;  /* Verde para el total */
+    font-size: 28px; /* Aumentado */
+    margin-left: 15px; /* Aumentado */
 }
